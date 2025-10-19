@@ -1,0 +1,37 @@
+# macOS generated files
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+__MACOSX
+
+# Obsidian vault
+.obsidian/
+
+# Go build artifacts
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of 'go tool cover'
+*.out
+
+# Go module dependency directory
+vendor/
+
+# Local build directory
+/bin/
+/pkg/
+
+# Stargate local state (as per SPEC.md)
+.stargate/
+.stargate-leader
+*.ndjson
