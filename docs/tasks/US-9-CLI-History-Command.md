@@ -21,6 +21,15 @@ Implement the `git kv history <key>` command. This command provides a chronologi
 
 ## 3. Test Plan
 
-- **Integration Test:** Set a key, then update it multiple times. Run `git kv history <key>` and verify all changes are shown in the correct order.
-- **Edge Case:** Run `git kv history` for a non-existent key and verify it returns an empty log or a clear message indicating the key was not found.
-- **Edge Case:** Run `git kv history` for a key that was deleted and verify its full history, including the deletion, is shown.
+- **Integration Test (Chronological Order & Format):**
+  - Set a key, then update it multiple times across different epochs.
+  - Run `git kv history <key>`.
+  - Assert that entries are ordered newest-first (most recent entry first).
+  - Assert that each entry complies with the specified human-readable format (e.g., timestamp ISO8601, author, action, value).
+- **Edge Case (Non-existent Key):**
+  - Run `git kv history` for a key that does not exist.
+  - Assert that the command returns "Key not found" on stdout and exits with code 0.
+- **Edge Case (Deleted Key):**
+  - Set a key, then delete it.
+  - Run `git kv history <key>`.
+  - Assert that the full history, including a specific deletion entry in the defined format, is shown in the correct chronological position.
