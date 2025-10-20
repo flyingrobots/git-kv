@@ -10,9 +10,9 @@ Create a `Dockerfile` at the root of the repository. This file will define the b
 
 - A `Dockerfile` exists at `/Dockerfile`.
 - The `Dockerfile` uses a recent, stable Go image (e.g., `golang:1.21`).
-- It installs `git` and any other essential command-line tools required for development.
-- It sets up a working directory (e.g., `/work`).
-- It exposes any necessary ports (if applicable, though not strictly needed for CLI development).
+- Installs `git` and other essential command-line tools required for development.
+- Sets up a working directory (e.g., `/work`).
+- Optionally exposes service ports only if the container runs networked services or a UI; otherwise, no ports are required.
 
 ## 3. Test Plan
 
