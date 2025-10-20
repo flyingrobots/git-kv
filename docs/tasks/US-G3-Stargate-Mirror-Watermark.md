@@ -8,9 +8,8 @@ As part of the mirror worker's logic, implement the crucial step of updating a w
 
 ## 2. Acceptance Criteria
 
-- After the mirror worker successfully pushes a ledger ref (e.g., `refs/kv/main`) to the GitHub remote, it performs a second push.
-- This second push updates the `refs/kv-mirror/main` ref on the GitHub remote to point to the exact same commit OID as the `refs/kv/main` ref that was just pushed.
-- This update should be done atomically with the main push if possible, or as a separate, final step.
+- The mirror worker **must** perform a single `git push --atomic` command that includes both the ledger ref (e.g., `refs/kv/main`) and its corresponding watermark ref (`refs/kv-mirror/main`).
+- This atomic push updates `refs/kv-mirror/main` on the GitHub remote to point to the same commit OID as the `refs/kv/main` ref that was just pushed.
 
 ## 3. Test Plan
 
