@@ -10,7 +10,7 @@ Implement the `git kv list` command, which provides an efficient way to find key
 
 - A `git kv list` command is added to the CLI.
 - It accepts an optional `--prefix <p>` flag.
-- If no prefix is given, it should list all keys (up to a reasonable limit or via pagination if implemented later).
+- If no prefix is given, it lists the first 1000 keys found. This limit is configurable via a `--limit` flag (default 1000). Pagination is a future enhancement.
 - The command logic specifically targets the `refs/kv-index/<ns>` branch for its data.
 - The output is a simple list of key names, one per line.
 
