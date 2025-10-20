@@ -13,7 +13,12 @@ Implement the logic to generate the `.manifest.json` file. This file acts as a p
   - `v`: version number
   - `key`: the key name
   - `total_size`: total size of the original file
-  - `chunking`: details about the chunking algorithm used
+  - `chunking`: object with details about the chunking algorithm used:
+    - `algo`: string (algorithm name like "fastcdc" or "fixed-size")
+    - `blockSize`: integer (chunk size in bytes, e.g., 16384, for fixed-size chunking)
+    - `minSize`: integer (minimum chunk size in bytes, for CDC)
+    - `avgSize`: integer (average chunk size in bytes, for CDC)
+    - `maxSize`: integer (maximum chunk size in bytes, for CDC)
   - `algo`: digest algorithm for chunks (e.g., `sha256`)
   - `etype`: ETag of the full file (e.g., `blake3:...`)
   - `chunks`: an array of chunk objects.
