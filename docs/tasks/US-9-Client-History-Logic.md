@@ -11,7 +11,14 @@ Implement the core client-side logic for retrieving the commit history of a spec
 - A function exists that takes a key and a Git branch reference as input.
 - It constructs the correct file path for the key within the ledger tree (e.g., `data/<hh>/<hh>/<urlsafe-key>`).
 - It executes a Git command (e.g., `git log -- <path>`) to get the history of that specific path on the given branch.
-- The function returns a list of commit objects or their relevant metadata.
+- It returns a list of `CommitInfo` objects. Each `CommitInfo` object **must** contain:
+  - `OID`: string (full commit SHA)
+  - `Timestamp`: int64 (Unix epoch seconds)
+  - `Message`: string (first line of commit message)
+  - `AuthorName`: string
+  - `AuthorEmail`: string
+  - `EpochID`: string (from `Epoch` trailer)
+  - `OperationType`: string (e.g., `set`, `del`, from `Op` trailer, if available)
 
 ## 3. Test Plan
 
