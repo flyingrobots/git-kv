@@ -17,7 +17,22 @@ Implement the `git kv wait` command. This command allows a client (like a CI scr
 
 ## 3. Test Plan
 
-- **Integration Test (Success):** In a test repo, run `wait` for an OID. In a separate process, update the `refs/kv-mirror/main` ref to that OID. Verify the `wait` command exits successfully.
-- **Integration Test (Timeout):** Run `wait` for an OID that will never be set. Verify the command times out after the specified duration and returns an error.
-- **Unit Test:** Test the polling logic in isolation.
-- **Unit Test:** Test the ancestor-checking logic (`git merge-base --is-ancestor`).
+- **Integration Test (Success):**
+  - Start `git kv wait --oid <target_oid> --timeout 30s` in a background process.
+  - 2 seconds after `wait` starts, update `refs/kv-mirror/main` to `<target_oid>` in a separate process.
+  - Assert `wait` exits successfully (code 0) within 5 seconds.
+- **Integration Test (Timeout):**
+  - Run `git kv wait --oid <non_existent_oid> --timeout 5s`.
+  - Assert the command exits with a timeout error (non-zero code) after exactly 5 seconds.
+- **Integration Test (Network Failure - Transient):**
+  - Configure a mock remote to simulate transient network failures for `git ls-remote` (e.g., fail 2 times, then succeed).
+  - Run `git kv wait`. Assert the command retries and eventually succeeds.
+- **Integration Test (Network Failure - Permanent):**
+  - Configure a mock remote to simulate permanent network failures for `git ls-remote`.
+  - Run `git kv wait`. Assert the command exits with an immediate error or after a configured number of retries.
+- **Unit Test (Polling Logic):** Mock `git ls-remote` outputs (e.g., "not found" -> "not found" -> "found after N polls"). Verify the polling logic correctly determines success or timeout.
+- **Unit Test (Ancestor Checking):** Test `git merge-base --is-ancestor` logic with mock OIDs:
+  - Target is ancestor of current.
+  - Target is not ancestor of current.
+  - Unrelated branches.
+  - Non-existent OIDs (expect timeout, not crash).
