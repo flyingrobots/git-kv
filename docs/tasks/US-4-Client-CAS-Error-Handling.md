@@ -8,10 +8,11 @@ Implement the client-side logic to handle the specific rejection that occurs dur
 
 ## 2. Acceptance Criteria
 
+- **Dependency:** This task depends on `US-4-Stargate-CAS-Check.md` for the exact CAS conflict error format.
 - When a `git push` from a `set` or `mset` command with `--expect-tree` is rejected by the Stargate, the client inspects the stderr output from Git.
-- The client looks for the specific, machine-readable error message sent by the Stargate for a CAS failure.
-- If this message is detected, the client CLI exits with a specific exit code (e.g., `2` as per the spec).
-- The CLI prints a user-friendly error message, such as "Error: A concurrent modification occurred. Please try again."
+- The client must detect the exact CAS conflict error message: "ERROR: CAS_CONFLICT: Expected tree OID mismatch."
+- The client CLI **must** exit with exit code `2`.
+- The client CLI **must** print the exact user-facing message: "Error: A concurrent modification occurred. Please try again."
 
 ## 3. Test Plan
 
