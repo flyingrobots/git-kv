@@ -26,6 +26,22 @@ Implement two key policy enforcement checks within the Stargate `pre-receive` ho
   - **Example:** `POLICY_VIOLATION:UNSIGNED_COMMIT:require_signed_commits:push signed by unauthorized key`
 - Implementations **must** emit messages exactly in this pattern so clients can reliably parse by splitting on `:` and validating the first token equals `POLICY_VIOLATION`.
 
+### Glob Syntax
+
+Use Git's `wildmatch` (gitignore-style) globbing rules when evaluating policy patterns. Matching is case-sensitive and paths are evaluated relative to the repository root unless a pattern begins with `/`.
+
+- `*` matches zero or more characters within a single path segment (never `/`).
+- `?` matches exactly one character within a segment (never `/`).
+- `**` matches zero or more complete path segments and may cross directory boundaries.
+- `/` inside a pattern is treated as a path separator; a leading `/` anchors the match to the repository root.
+- Escape literal glob tokens with `\` (e.g., `\*` matches a literal `*`).
+
+Examples (repo-relative paths):
+
+1. `config/keys/*.pub` matches `config/keys/app1.pub` but not `config/keys/nested/app2.pub`.
+2. `config/**/*.pub` matches `config/keys/app1.pub` and `config/keys/nested/app2.pub`.
+3. `/config/keys/*.pub` matches `config/keys/app1.pub` at the repository root but not `services/config/keys/app1.pub`.
+
 ## 3. Test Plan
 
 - **Integration Test (Signer Policy):**

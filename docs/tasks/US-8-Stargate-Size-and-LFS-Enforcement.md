@@ -19,7 +19,7 @@ Implement two additional policy enforcement checks within the Stargate `pre-rece
 - The hook rejects pushes when either individual chunks exceed `max_value_inline` or the combined chunk sum exceeds `max_value_total`.
 - Validation follows optimistic concurrency: each push is evaluated atomically against the current manifest/chunk set; concurrent pushes to the same key are serialized via Stargate's pre-receive queue (successful pushes advance manifests, conflicting pushes receive deterministic rejection). Garbage-collection processes must coordinate via version checks or locks so active pushes encountering GC races receive a retriable `RETRY_LATER` error; clients should retry with exponential backoff.
 - The hook must confirm chunk uploads adhere to the US-5 contract: manifests reference chunk IDs matching `/chunks` API responses, each chunk size equals the FastCDC defaults (`min=64KB`, `avg=256KB`, `max=1MB` unless overridden), and uploads exceeding `max_value_inline` are chunked rather than inline.
-- Documented failure modes include: `SIZE_LIMIT_EXCEEDED`, `MANIFEST_TOO_LARGE`, `LFS_FORBIDDEN`, and `RETRY_LATER` (for GC/concurrency races). Clients must handle `RETRY_LATER` via retry policy; other failures are terminal.
+- Documented failure modes include the canonical error codes defined in the **Error Codes & Semantics** section below (`SIZE_LIMIT_EXCEEDED`, `MANIFEST_TOO_LARGE`, `LFS_FORBIDDEN`, `RETRY_LATER`).
 - **LFS Prevention:**
   - If the policy includes `forbidden: [{ lfs: true }]`, the hook inspects the pushed content.
   - It looks for Git LFS pointers (which are small text files with a specific format).
@@ -28,6 +28,32 @@ Implement two additional policy enforcement checks within the Stargate `pre-rece
   - Example (inline limit): `Rejected: max_value_inline: 2097152 B vs 1048576 B (2.0 MB actual, 1.0 MB limit) KEY=users/123`.
   - Example (total limit): `Rejected: max_value_total: 52428800 B vs 20971520 B (50.0 MB actual, 20.0 MB limit) KEY=data/x`.
   - Example (LFS): `Rejected: LFS: detected at 'assets/video.mp4' — forbidden by policy`.
+
+### Error Codes & Semantics
+
+All hook failures must emit a single-line JSON object on stderr using the schema `{ "code": string, "message": string, "details": object }` in addition to any human-readable summary. The table below defines the required contract for each code:
+
+| Code | HTTP Status | Git Hook Exit Code | Cause | Client Action |
+| --- | --- | --- | --- | --- |
+| `SIZE_LIMIT_EXCEEDED` | 400 | 1 | Any inline blob or chunk exceeds `max_value_inline` or the summed chunks exceed `max_value_total`. `details` MUST include `key`, `limit_bytes`, and `actual_bytes`. | Reduce payload size or chunk appropriately before retrying. |
+| `MANIFEST_TOO_LARGE` | 400 | 1 | Manifest JSON exceeds 64 KiB uncompressed. `details` MUST include `key`, `manifest_bytes`, `limit_bytes`. | Regenerate manifest within limits and retry. |
+| `LFS_FORBIDDEN` | 403 | 1 | Detected Git LFS pointer in a path governed by policy. `details` MUST include `path` and `pointer_oid`. | Remove LFS pointer or disable policy before retrying (terminal). |
+| `RETRY_LATER` | 503 | 75 (EX_TEMPFAIL) | Transient contention (e.g., GC races, CAS conflicts while validating chunks/manifests). `details` MUST include `reason` (e.g., `GC_RACE`, `CAS_CONFLICT`) and `retry_after_ms`. | Retry with exponential backoff (base 100ms, multiplier 2, cap 5s) up to 5 attempts. |
+
+Operational requirements for `RETRY_LATER`:
+
+- The hook MUST log the transient reason with structured metadata so operators can distinguish temporary vs terminal failures.
+- Clients encountering `RETRY_LATER` MUST retry the push using the documented backoff profile (initial delay 100ms, double each attempt, capped at 5s, max 5 attempts). Exceeding the attempt budget escalates to operators.
+
+**Examples:**
+
+```json
+{"code":"SIZE_LIMIT_EXCEEDED","message":"inline blob exceeds max_value_inline","details":{"key":"users/123","limit_bytes":1048576,"actual_bytes":2097152}}
+```
+
+```json
+{"code":"RETRY_LATER","message":"temporary manifest validation race","details":{"reason":"GC_RACE","retry_after_ms":500}}
+```
 
 ## 3. Test Plan
 

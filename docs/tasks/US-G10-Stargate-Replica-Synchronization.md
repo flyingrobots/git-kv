@@ -18,8 +18,11 @@ Implement the mechanism for passive Stargate nodes to continuously synchronize t
 
 ## 3. Test Plan
 
+- **Lag Measurement Methodology:** For all scenarios referencing lag, measure the wall-clock difference between (a) the timestamp when the leader accepts and records a commit (capture via monotonic clock or `git` commit metadata written at acceptance) and (b) the timestamp when the passive node first exposes the same commit SHA in its repository. Systems MUST run with synchronized clocks using NTP/chrony with maximum drift ≤100ms. If clock sync cannot be guaranteed, capture leader-side timestamps in replication metadata and compare them upon arrival. Collect samples continuously during steady state for at least 30 minutes, computing rolling p50 and p99 over 5-minute windows; report both the final aggregated p50/p99 and any windows that breach SLOs.
+- **Instrumentation:** Emit metrics named `stargate.replication.lag_seconds` tagged with `replica=<hostname>` and `namespace=<kv_namespace>`, exported every 10 seconds. Alerts trigger when p50 exceeds 15s or p99 exceeds 120s for two consecutive 5-minute windows; alert payloads must include the offending percentile, replica, and leader.
+
 - **Integration Test (Bulk Writes):** Deploy leader/passive. Apply 100 sequential `git kv set` operations (unique keys). Poll passive every 1s for 30s and assert parity is achieved within 30s (otherwise fail).
-- **Integration Test (Lag Metrics):** Record lag metrics during steady state; verify median ≤15s and P99 ≤120s; confirm alert triggers when thresholds exceeded.
+- **Integration Test (Lag Metrics):** Record `stargate.replication.lag_seconds` during a 30-minute steady-state run using the methodology above; verify rolling p50 ≤15s and p99 ≤120s, and confirm the alerting pipeline fires when either percentile breaches its threshold for two consecutive 5-minute windows (alert payload must include replica, leader, percentile, and observed value).
 - **Integration Test (Failover):** After convergence, promote passive to leader (documented procedure), switch client traffic, and verify read/write consistency before/during/after promotion with no lost commits or out-of-order histories.
 - **Integration Test (Network Disruption):** Use firewall rules or `tc netem` to drop traffic for 10s, 60s, and 5m; confirm sync resumes, lag returns within SLO, and no duplicate commits.
 - **Integration Test (Leader Failure Mid-Fetch):** Kill leader during active fetch; ensure passive handles errors, retries per policy, and resyncs once leader returns.
