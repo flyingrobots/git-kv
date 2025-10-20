@@ -30,4 +30,26 @@ Implement the `git kv stargate sync` command. This command is an administrative 
 ## 3. Test Plan
 
 - **Unit Test:** Test the command-line parsing for all flags and their mutual exclusivity.
-- **Integration Test:** Run `git kv stargate sync --help` and verify the output is correct.
+- **Integration Test (Dry Run):**
+  - **Setup:** Create a test repository with a known divergence (Stargate ahead, mirror ahead, or both).
+  - **Action:** Run `git kv stargate sync --dry-run`.
+  - **Assert:** The output (console and `--output=json`) accurately lists all detected differences without applying any changes.
+- **Integration Test (Repair Mode):**
+  - **Setup:** Create a test repository where Stargate is ahead (fast-forwardable).
+  - **Action:** Run `git kv stargate sync --repair`.
+  - **Assert:** The mirror is successfully updated.
+  - **Setup:** Create a test repository where the mirror is ahead (non-fast-forward).
+  - **Action:** Run `git kv stargate sync --repair`.
+  - **Assert:** The command reports a non-fast-forward error and does not push.
+- **Integration Test (Force Mode - Authorization):**
+  - **Setup:** Configure a test policy with an admin user.
+  - **Action:** Run `git kv stargate sync --force` as a non-admin. Assert rejection.
+  - **Action:** Run `git kv stargate sync --force` as an admin. Assert success (after confirmation).
+- **Integration Test (Force Mode - Overwrite):**
+  - **Setup:** Create a test repository with a known divergence (mirror has unique commits).
+  - **Action:** Run `git kv stargate sync --force` as an admin.
+  - **Assert:** The mirror's state is forcibly overwritten to match the Stargate.
+- **Integration Test (Error Handling & Recovery):**
+  - Simulate transient network errors during push. Assert retries and eventual success.
+  - Simulate permanent network errors. Assert appropriate failure and logging.
+- **Integration Test (Idempotency):** Run `git kv stargate sync --repair` or `--force` multiple times on a synchronized repo. Assert no changes are made after the first successful run.
