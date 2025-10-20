@@ -15,6 +15,15 @@ Research, select, and integrate a Go library that provides Content-Defined Chunk
 
 ## 3. Test Plan
 
-- **Unit Test:** Create a test that passes a sample data file to the chunking service and verifies that it is broken into multiple chunks.
-- **Unit Test:** Verify that for a known input, the number and size of the generated chunks are as expected.
-- **Benchmark:** Create a benchmark test to measure the throughput of the chunking library on a large file.
+- **Unit Test (Deterministic Chunking):**
+  - **Fixture:** `docs/tasks/testdata/chunker_fixtures/large-file-1mb.bin` (1,048,576 bytes of known content).
+  - **Chunker Config:** `minSize=64KB`, `avgSize=256KB`, `maxSize=1MB`, specific normalization level (if applicable).
+  - **Assert:**
+    - The exact count of chunks produced.
+    - The exact `Fingerprint` (hash) of each chunk.
+    - The chunk boundaries (start/end offsets) are reproducible across multiple runs.
+- **Benchmark Test:**
+  - **Fixture:** `docs/tasks/testdata/chunker_fixtures/large-file-100mb.bin` (100MB of known content).
+  - **Chunker Config:** Same as above.
+  - **Metric:** Record throughput in MB/sec.
+  - **Target:** Establish a measurable baseline/target (e.g., >50 MB/sec) for actionable results.
