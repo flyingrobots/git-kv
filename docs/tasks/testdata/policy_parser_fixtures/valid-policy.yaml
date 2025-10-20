@@ -1,0 +1,3 @@
+version: 1
+stargate:
+  push_url: "ssh://git@stargate.local/org/repo.git"
