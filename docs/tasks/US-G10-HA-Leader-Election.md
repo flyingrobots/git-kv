@@ -18,6 +18,24 @@ Implement the leader election mechanism for Stargate. This component ensures tha
 
 ## 3. Test Plan
 
-- **Unit Test:** Test the lock acquisition and release logic in isolation.
-- **Integration Test (Failover):** Deploy two Stargate instances. Verify that one becomes the leader. Simulate a leader crash and verify that the other instance takes over leadership.
-- **Integration Test (Split-Brain Prevention):** Verify that under no circumstances do two instances simultaneously believe they are the leader.
+- **Integration Test (Failover):**
+  1. Start Stargate instance A.
+  2. Wait 10s. Assert `/healthz` and `/readyz` report A as leader.
+  3. Kill instance A.
+  4. Wait 5s for lease timeout.
+  5. Start Stargate instance B.
+  6. Wait 15s. Assert `/healthz` and `/readyz` report B as leader.
+  7. Inspect logs of both A and B to assert there was never an overlap where both instances logged "became leader" within the same lease window.
+- **Integration Test (Split-Brain Prevention):**
+  1. Deploy two Stargate instances (A and B).
+  2. Partition the network between A and the Redis datastore for 10 seconds.
+  3. Simultaneously force A to attempt to renew its lock and B to attempt to acquire the lock.
+  4. Poll `/readyz` endpoints every 1 second.
+  5. Assert that at no point do both A and B report themselves as leader.
+  6. Scan logs for leadership grant/revoke events.
+- **Unit Test (Lock Acquisition):**
+  - Test lock acquisition success/failure (on failure, the instance must not transition to leader).
+  - Test concurrent acquisition attempts where only one caller receives the lock.
+- **Unit Test (Renewal & Demotion):**
+  - Test renewal success.
+  - Test renewal failure triggers demotion and cleanup (e.g., deleting its lock if still owner).
