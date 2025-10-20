@@ -15,7 +15,7 @@ Implement the logic within the Stargate service to find, load, and parse the `.k
 
 ## 3. Test Plan
 
-- **Unit Test:** Test the YAML parsing with a valid policy file and verify the resulting Go object has the correct values.
-- **Unit Test (Missing):** Test the behavior when the policy file is missing.
-- **Unit Test (Malformed):** Test the behavior with an invalid YAML file and verify it returns an error.
-- **Unit Test (Schema):** Test with a policy file that is valid YAML but has incorrect field names or types.
+- **Unit Test (Valid):** Verify YAML parsing with a valid policy file; check that the Go object is correctly populated.
+- **Unit Test (Missing):** Verify behavior when the `.kv/policy.yaml` file is absent; ensure the configured fail-safe/fail-open strategy is applied.
+- **Unit Test (Malformed):** Attempt to parse an invalid YAML file; verify the error is caught and handled per configuration.
+- **Unit Test (Schema):** Parse a syntactically-valid YAML file with incorrect field names/types; verify schema validation catches this.
