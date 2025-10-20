@@ -1,0 +1,21 @@
+# Task: Stargate Policy Loader
+
+**Feature:** `US-8 — Policy Enforcement`
+
+## 1. Description
+
+Implement the logic within the Stargate service to find, load, and parse the `.kv/policy.yaml` file from the repository. This parsed policy object will be used by the `pre-receive` hook to enforce rules.
+
+## 2. Acceptance Criteria
+
+- The Stargate service, on startup or on push, locates and reads the `.kv/policy.yaml` file from the repository's default branch.
+- It uses a YAML parser to load the file content into a structured Go object.
+- The logic is resilient to a missing policy file or a malformed one, and can be configured to either fail-safe (reject all pushes) or fail-open (allow all pushes) in such cases.
+- The parsed policy object is made available to the validation logic within the `pre-receive` hook.
+
+## 3. Test Plan
+
+- **Unit Test:** Test the YAML parsing with a valid policy file and verify the resulting Go object has the correct values.
+- **Unit Test (Missing):** Test the behavior when the policy file is missing.
+- **Unit Test (Malformed):** Test the behavior with an invalid YAML file and verify it returns an error.
+- **Unit Test (Schema):** Test with a policy file that is valid YAML but has incorrect field names or types.
