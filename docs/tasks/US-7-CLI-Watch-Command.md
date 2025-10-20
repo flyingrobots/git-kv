@@ -25,4 +25,16 @@ Implement the `git kv watch` command, which allows a client to stream the change
 
 - **Integration Test:** Create several commits in the watchlog. Run `git kv watch` and verify the output matches the content of the commits.
 - **Integration Test (`--since`):** Run `watch` with a `--since` OID from the middle of the log and verify only the later changes are printed.
-- **Integration Test (`--follow`):** Run `watch -f`. In a separate process, create a new change. Verify the `watch` command prints the new change and does not exit.
+- **Integration Test (`--follow` mode):**
+  1. Start `git kv watch -f --poll-interval 2s` in a background process.
+  2. Wait 3 seconds.
+  3. In a separate process, create a new change (e.g., `git kv set`).
+  4. Within 5 seconds, verify that the `watch` command prints the new change.
+  5. Verify the `watch` command continues to run and does not exit.
+  6. Implement cleanup procedures to reliably terminate the background `watch` process.
+- **Integration Test (Latency):**
+  1. Start `git kv watch -f --poll-interval 1s` in a background process.
+  2. Record timestamp T1.
+  3. In a separate process, create a new change.
+  4. Record timestamp T2 when the `watch` command prints the change.
+  5. Assert that `T2 - T1` is within an acceptable latency bound (e.g., < 3 seconds).
