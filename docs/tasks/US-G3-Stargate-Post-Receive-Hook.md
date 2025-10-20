@@ -30,7 +30,10 @@ Implement or update the `post-receive` hook on the Stargate server. After a push
   {"timestamp":"2025-10-26T12:34:56Z","event":"ref_update","ref":"refs/kv/main","old_oid":"a1b2c3d4...","new_oid":"e5f6g7h8...","pusher":"user@example.com","repo":"flyingrobots/git-kv","source":"post-receive","meta":{"txn_id":"01JBAX..."}}
   ```
 - Each entry **must** be atomically appended (single-line JSON) to the journal file.
-- The hook must be robust and not fail silently.
+- **Robustness & Logging:**
+  - The hook logs all errors to a dedicated log file (e.g., `stargate-post-receive.log`) with timestamps and details.
+  - If the journal write fails, the hook exits with a non-zero status and reports the error to `git` (which is then shown to the client).
+  - The hook handles partial ref updates gracefully; if some refs succeed and others fail, it logs the failures but continues processing other refs.
 
 ## 3. Test Plan
 
