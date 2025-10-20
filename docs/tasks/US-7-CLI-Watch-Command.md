@@ -15,6 +15,11 @@ Implement the `git kv watch` command, which allows a client to stream the change
 - If `--since` is provided, the log starts from the specified OID; otherwise, it shows the entire log.
 - The command prints the content of each commit blob in the log to stdout.
 - The command can have a `--follow` or `-f` mode to wait for and stream new changes as they appear.
+  - **Mechanism:** It detects new commits by polling the `refs/kv-watchlog/<ns>@<epoch>` ref on the remote.
+  - **Polling Interval:** The polling interval defaults to 5 seconds and is configurable via a `--poll-interval` flag.
+  - **State Tracking:** It tracks the last streamed commit OID to ensure only new, unseen changes are streamed.
+  - **Latency:** The expected latency between a new change being published and the watch client seeing it is within `poll-interval + network_latency`.
+  - **Termination:** The command runs indefinitely until manually terminated (e.g., Ctrl+C).
 
 ## 3. Test Plan
 
