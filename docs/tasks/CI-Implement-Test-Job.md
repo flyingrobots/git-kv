@@ -6,13 +6,15 @@
 
 Add a job to the CI workflow that checks out the code, sets up the Go environment, and runs the project's tests.
 
+**Note on Action Versions:** All GitHub Actions used (e.g., `actions/checkout`, `actions/setup-go`) should be pinned to specific major versions (e.g., `@v4`, `@v5`) for stability. Consistency in these versions across all CI-related tasks is paramount to avoid maintenance burden and ensure predictable behavior.
+
 ## 2. Acceptance Criteria
 
 - The `ci.yml` file contains a job named `test`.
 - The job uses `actions/checkout@v4` to check out the repository code.
 - It uses `actions/setup-go@v5` to set up the Go environment.
 - It executes `make test`.
-- The job reports its status (success/failure) back to GitHub.
+- The job fails fast on test failure (non-zero exit code from `make test` causes job to fail).
 
 ## 3. Test Plan
 

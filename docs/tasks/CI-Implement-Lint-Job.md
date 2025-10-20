@@ -6,6 +6,8 @@
 
 Add a job to the CI workflow that checks out the code, sets up the Go environment, and runs the project's linter.
 
+**Note on Action Versions:** All GitHub Actions used (e.g., `actions/checkout`, `actions/setup-go`) should be pinned to specific major versions (e.g., `@v4`, `@v5`) for stability. Consistency in these versions across all CI-related tasks is paramount to avoid maintenance burden and ensure predictable behavior.
+
 ## 2. Acceptance Criteria
 
 - The `ci.yml` file contains a job named `lint`.
