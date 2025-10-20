@@ -8,7 +8,7 @@ Update the Stargate's `pre-receive` hook to perform the Compare-And-Swap (CAS) c
 
 ## 2. Acceptance Criteria
 
-- The `pre-receive` hook needs a mechanism to receive the `--expect-tree` OID from the client. (This could be a commit trailer or a push option).
+- The client **must** send the `--expect-tree` OID via a Git push option. The exact format to use is `-o expect-tree=<oid>`.
 - Before other validation, the hook checks if a CAS operation is requested.
 - If so, it reads the current OID of the `refs/kv/<ns>` branch tip.
 - It compares this current OID with the expected OID from the client.
