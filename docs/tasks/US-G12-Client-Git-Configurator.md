@@ -8,9 +8,14 @@ Implement the client-side logic responsible for modifying the local Git configur
 
 ## 2. Acceptance Criteria
 
-- A function exists that takes a Git remote name (e.g., `origin`), a configuration key (e.g., `pushurl`), and a value as input.
+- A function `ConfigureRemote(remoteName string, key string, value string) error` is defined.
+- On success, it returns `nil`.
+- On failure, it returns a `ConfigError` object/enum containing:
+  - `Code`: machine-friendly code (e.g., `INVALID_REMOTE`, `GIT_FAILED`, `PERMISSION_DENIED`).
+  - `Message`: human-readable message.
+  - `ExitCode`: underlying `git` exit code or OS error code.
+- Errors are returned, not thrown (consistent with Go error handling style).
 - It executes the appropriate `git config` command to set the specified configuration (e.g., `git config remote.origin.pushurl <value>`).
-- The function handles potential errors from the `git config` command (e.g., invalid remote name).
 
 ## 3. Test Plan
 
