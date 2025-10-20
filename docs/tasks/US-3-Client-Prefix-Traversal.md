@@ -19,6 +19,9 @@ Implement the specific logic for the `list` command to translate a given key pre
 
 ## 3. Test Plan
 
-- **Unit Test:** Test with a variety of prefixes (`user:`, `u`, `user:12345`) and verify the correct index directory path is returned for each.
-- **Edge Case:** Test with an empty prefix; it should return the root of the index (`index/`).
-- **Edge Case:** Test with prefixes containing special characters that might be valid in keys but not in file paths, and ensure they are handled gracefully.
+- **Unit Test:** Test multiple prefixes: `user:`, `u`, `user:12345`, `cfg:feature:`, `a`, `ab`, `abc`. Verify the correct index directory path is returned for each based on the 2-character sharding.
+- **Edge Case (Empty Prefix):** Test with an empty prefix (`""`). Assert it returns `index/`.
+- **Edge Case (Special Characters):**
+  - Keys are URL-encoded for filesystem-safe directory names.
+  - Test with prefixes containing special characters (e.g., `key/with:slash`, `key?with*star`). Assert the correct URL-encoded path is returned.
+  - Test with prefixes containing characters disallowed even after URL-encoding (e.g., null bytes). Assert an explicit error is returned.
