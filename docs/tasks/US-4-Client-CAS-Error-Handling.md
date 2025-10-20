@@ -16,5 +16,16 @@ Implement the client-side logic to handle the specific rejection that occurs dur
 
 ## 3. Test Plan
 
-- **Integration Test:** Use the CAS failure integration test from the Stargate task. Run the client command that is expected to fail and assert that it exits with the correct exit code (e.g., `2`) and that the error message printed to the user is the friendly, expected message.
-- **Unit Test:** Write a unit test that feeds mock `git` stderr output (both for CAS failure and other generic failures) to the error handling function and verify it behaves correctly.
+- **Integration Test (CAS Failure):**
+  - **Setup:** Execute the Stargate CAS Check integration test (`US-4-Stargate-CAS-Check.md`) to trigger a CAS failure.
+  - **Action:** Run the client command that triggered the CAS failure.
+  - **Assert:**
+    - Exit code is `2` (exactly).
+    - Stderr contains: "Error: A concurrent modification occurred. Please try again."
+    - No exception/panic occurs.
+- **Unit Test (Error Message Parsing):**
+  - **Setup:** Mock `git` stderr with the Stargate CAS failure message: "ERROR: CAS_CONFLICT: Expected tree OID mismatch."
+  - **Action:** Call the error-handling function responsible for parsing `git` stderr.
+  - **Assert:**
+    - Returns an error type indicating CAS failure.
+    - The suggested user-facing message is "Error: A concurrent modification occurred. Please try again."
