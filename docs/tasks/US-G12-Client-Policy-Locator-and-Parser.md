@@ -14,6 +14,7 @@ Implement the client-side logic to locate and parse the `.kv/policy.yaml` file. 
 - If found, it reads and parses the YAML content into a `Policy` Go struct.
 - **Example:** `LoadPolicy("/repo/worktrees/wt-a")` checks only `/repo/worktrees/wt-a/.kv/policy.yaml`; it does not fall back to `/repo/.kv/policy.yaml`.
 - **Policy YAML Schema:**
+
   ```yaml
   version: 1 # Required, integer
   stargate: # Required object
@@ -53,12 +54,16 @@ Implement the client-side logic to locate and parse the `.kv/policy.yaml` file. 
       ingestion: # Optional object
         allowed_formats: ["jsonl", "csv"]
         max_batch_size: "20MiB"
+
+  ```
+
 - **Size & Duration Formats:**
   - Sizes accept integers optionally followed by unit suffix: `B`, `KB`, `MB`, `GB` (decimal) or `KiB`, `MiB`, `GiB` (binary). Decimal units use powers of 1000; binary units use powers of 1024. Units are case-sensitive and must match exactly; whitespace is not permitted. Floating point values are rejected. Parsed values are stored as `uint64` bytes.
   - Durations accept integers with suffix `s`, `m`, `h`, `d`, or `w` (seconds, minutes, hours, days, weeks). Units are case-sensitive; mixed or floating values are rejected. Parsed values are stored as `time.Duration` (nanoseconds) or `int64` seconds.
   - Invalid formats emit validation errors specifying the offending value; overflow beyond `uint64` or `time.Duration` maximums also fails validation.
-  ```
+
 - **Go Struct Definition:**
+
   ```go
   type SizeBytes uint64
 
@@ -132,11 +137,13 @@ Fixtures for these tests are committed under `docs/tasks/testdata/policy_parser_
 
 - **Unit Test (Success):**
   - **Fixture:** `docs/tasks/testdata/policy_parser_fixtures/valid-policy.yaml`
+
     ```yaml
     version: 1
     stargate:
       push_url: "ssh://git@stargate.local/org/repo.git"
     ```
+
   - **Expected Output:** `stargate.push_url` value is `"ssh://git@stargate.local/org/repo.git"`.
   - Verify the function correctly parses the file and extracts the `push_url`.
 - **Unit Test (Missing File):**
@@ -146,20 +153,24 @@ Fixtures for these tests are committed under `docs/tasks/testdata/policy_parser_
 - **Unit Test (Nested Policy Ignored):** Provide a policy file under a subdirectory; assert loader ignores it when `repoRoot/.kv/policy.yaml` is absent.
 - **Unit Test (Malformed YAML):**
   - **Fixture:** `docs/tasks/testdata/policy_parser_fixtures/malformed-policy.yaml`
+
     ```yaml
     version: 1
     stargate:
       push_url: "ssh://git@stargate.local/org/repo.git"
     - This is not valid YAML
     ```
+
   - **Expected Error:** A specific YAML parsing error string.
   - Verify the function returns the expected parsing error.
 - **Unit Test (Missing Field):**
   - **Fixture:** `docs/tasks/testdata/policy_parser_fixtures/missing-push-url.yaml`
+
     ```yaml
     version: 1
     stargate: {}
     ```
+
   - **Expected Error:** A specific error string indicating the `stargate.push_url` field is missing (e.g., "stargate.push_url not found in policy").
   - Verify the function returns the expected error.
 - **Unit Test (Size Parsing):** Provide policies with values like `64KiB`, `1MB`, `1.5MB`. Assert valid ones parse to correct `SizeBytes` and invalid (floats, unknown units) return validation errors.

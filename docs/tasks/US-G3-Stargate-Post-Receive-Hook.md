@@ -14,6 +14,7 @@ Implement or update the `post-receive` hook on the Stargate server. After a push
 - The hook must ensure `.stargate/` exists (creating with mode `0755` if necessary) and that `mirror-journal.ndjson` exists with mode `0644`; creation errors must be logged and cause a non-zero exit.
 - The mirror worker defined in `US-G3-Stargate-Mirror-Worker` is the sole consumer of this journal; the hook must document this dependency in code comments or README updates.
 - The NDJSON schema for each entry **must** be:
+
   ```json
   {
     "entry_id": "string (unique identifier, e.g., ULID)",
@@ -30,6 +31,7 @@ Implement or update the `post-receive` hook on the Stargate server. After a push
   }
   ```
 - **Example NDJSON Entry:**
+
   ```json
   {"entry_id":"01JBAXF5Z8J8M7R2TK7G","timestamp":"2025-10-26T12:34:56Z","event":"ref_update","ref":"refs/kv/main","old_oid":"a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2","new_oid":"0f1e2d3c4b5a0f1e2d3c4b5a0f1e2d3c4b5a0f1e","pusher":"user@example.com","repo":"flyingrobots/git-kv","source":"post-receive","status":"pending","meta":{"txn_id":"01JBAXF5Z8J8M7R2"}}
   ```
