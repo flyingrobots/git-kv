@@ -9,11 +9,19 @@ Implement the `git kv remote setup` command. This command automates the configur
 ## 2. Acceptance Criteria
 
 - A `git kv remote setup` command is added to the CLI.
-- The command does not require any arguments.
-- It automatically locates and reads the `.kv/policy.yaml` file from the repository root.
-- It extracts the `stargate.push_url` value from the policy.
-- It executes `git config remote.origin.pushurl <url>` to set the push URL.
-- The command provides clear output to the user, confirming the action taken and the new `pushurl`.
+- It accepts an optional `--json` flag for machine-readable output.
+- The command emits plain-text confirmation by default:
+  - If `origin.pushurl` was previously unset: "Set remote.origin.pushurl to '<new_pushurl>'"
+  - If `origin.pushurl` was updated: "Updated remote.origin.pushurl from '<old_pushurl>' to '<new_pushurl>'"
+- When `--json` is used, it outputs a JSON object:
+  ```json
+  {
+    "old_pushurl": "<old_pushurl> | null",
+    "new_pushurl": "<new_pushurl>",
+    "status": "set | updated"
+  }
+  ```
+- The command exits 0 on success and nonzero on error, printing the error message to `stderr`.
 
 ## 3. Test Plan
 
