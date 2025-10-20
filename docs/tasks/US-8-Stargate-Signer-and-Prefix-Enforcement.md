@@ -25,5 +25,9 @@ Implement two key policy enforcement checks within the Stargate `pre-receive` ho
 
 ## 3. Test Plan
 
-- **Integration Test (Signer):** Enable `require_signed_commits`. Push an unsigned commit and verify rejection. Push a commit signed by an unauthorized key and verify rejection. Push a commit signed by an authorized key and verify success.
-- **Integration Test (Prefix):** Define a strict `allowed_prefixes` list. Push a transaction containing a key with a forbidden prefix and verify rejection.
+- **Integration Test (Signer Policy):**
+  - **Case 1 (Unsigned Commit):** Enable `require_signed_commits`. Push an unsigned commit. Assert rejection with `POLICY_VIOLATION:UNSIGNED_COMMIT:require_signed_commits:...`.
+  - **Case 2 (Unauthorized Signer):** Push a commit signed by an unauthorized key. Assert rejection with `POLICY_VIOLATION:UNAUTHORIZED_SIGNER:require_signed_commits:...`.
+  - **Case 3 (Authorized Signer):** Push a commit signed by an authorized key. Assert success.
+- **Integration Test (Prefix Policy):**
+  - Define a strict `allowed_prefixes` list. Push a transaction containing a key with a forbidden prefix. Assert rejection with `POLICY_VIOLATION:FORBIDDEN_PREFIX:allowed_prefixes:...`.
