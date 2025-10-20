@@ -14,4 +14,7 @@ As part of the mirror worker's logic, implement the crucial step of updating a w
 ## 3. Test Plan
 
 - **Integration Test:** After the mirror worker test successfully pushes a change, add an assertion to verify that the `refs/kv-mirror/main` ref on the mock GitHub remote has been updated to the correct commit OID.
-- **Edge Case:** Test a scenario where the main push succeeds but the watermark push fails. The mirror worker should detect this and retry the watermark push.
+- **Edge Case (Watermark Push Failure):**
+  - Simulate a scenario where the `git push --atomic` (containing both ledger and watermark refs) fails due to a transient error on the watermark ref.
+  - Assert that the mirror worker retries the push with exponential backoff (e.g., max 3 retries).
+  - Assert that after exhausting retries, an error is logged, but the journal entry is **not** marked as processed, ensuring it will be retried on the next worker cycle.
