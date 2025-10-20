@@ -2,19 +2,27 @@
 
 **Feature:** `US-G3 — Mirror Resilience & Read-After-Write`
 
-## 1. Description
+## 1. Context
+
+- **Mirror worker:** background process that consumes the mirror journal and mirrors successful ledger pushes to the GitHub remote.
+- **GitHub remote:** the external Git hosting provider that clients read from (typically `origin`).
+- **`git kv wait`:** CLI command that polls the mirror watermark to guarantee read-after-write visibility; depends on accurate `refs/kv-mirror/<ns>` updates.
+
+## 2. Description
 
 As part of the mirror worker's logic, implement the crucial step of updating a watermark ref (`refs/kv-mirror/<ns>`) on the GitHub remote. This ref provides a reliable, client-visible signal of the current mirror state and is essential for the `git kv wait` command.
 
-## 2. Acceptance Criteria
+## 3. Acceptance Criteria
 
 - The mirror worker **must** perform a single `git push --atomic` command that includes both the ledger ref (e.g., `refs/kv/main`) and its corresponding watermark ref (`refs/kv-mirror/main`).
 - This atomic push updates `refs/kv-mirror/main` on the GitHub remote to point to the same commit OID as the `refs/kv/main` ref that was just pushed.
+- If the atomic push fails, neither `refs/kv/main` nor `refs/kv-mirror/main` may be updated on the remote; the worker must treat the entry as unprocessed and schedule a retry.
+- Retry policy: attempt up to 5 pushes using exponential backoff with initial delay 100ms, multiplier 2x per retry, capped at 30s. Backoff applies between attempts.
 
-## 3. Test Plan
+## 4. Test Plan
 
 - **Integration Test:** After the mirror worker test successfully pushes a change, add an assertion to verify that the `refs/kv-mirror/main` ref on the mock GitHub remote has been updated to the correct commit OID.
 - **Edge Case (Watermark Push Failure):**
   - Simulate a scenario where the `git push --atomic` (containing both ledger and watermark refs) fails due to a transient error on the watermark ref.
-  - Assert that the mirror worker retries the push with exponential backoff (e.g., max 3 retries).
-  - Assert that after exhausting retries, an error is logged, but the journal entry is **not** marked as processed, ensuring it will be retried on the next worker cycle.
+  - Assert that the mirror worker retries according to the backoff policy (delays approx. 100ms, 200ms, 400ms, 800ms, 1.6s, capped at 30s) up to 5 attempts.
+  - Assert that after exhausting retries, an error is logged, the entry remains unprocessed, and the next worker cycle reattempts the push.

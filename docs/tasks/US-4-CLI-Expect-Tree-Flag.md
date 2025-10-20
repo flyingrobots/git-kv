@@ -8,13 +8,18 @@ Add the `--expect-tree <OID>` flag to the `git kv set` and `git kv mset` command
 
 ## 2. Acceptance Criteria
 
-- The `set` command in the CLI is updated to accept a new string flag, `--expect-tree`.
-- The `mset` command in the CLI is updated to accept the same `--expect-tree` flag.
-- The value of the flag (the OID) is captured and passed to the underlying client logic.
-- If the provided OID is not a valid Git OID format, the CLI should exit with a validation error before attempting any Git operations.
+- The `set` and `mset` commands accept a new string flag `--expect-tree <oid>` (short `-E <oid>` if available) and pass the value through to the client library.
+- The CLI validates the OID before invoking Git: it must match `^[0-9a-f]{40}$` (SHA-1) or `^[0-9a-f]{64}$` (SHA-256). On failure, exit with code `2` and print `Invalid OID: expected 40- or 64-character hexadecimal SHA; got '<value>'` to stderr.
+- The client library defensively re-validates the OID and throws a typed `ValidationError` (or equivalent) with the same message so callers receive consistent feedback if validation is bypassed.
 
 ## 3. Test Plan
 
-- **Unit Test:** Test the CLI parsing to ensure the flag is correctly registered and its value is passed to the application logic.
-- **Integration Test:** Run `git kv set --expect-tree 12345` and verify the CLI exits with an error because the OID is malformed.
-- **Integration Test:** Run `git kv set --help` and verify the new flag is present in the usage documentation.
+- **Unit Test (Parsing):** Ensure both `git kv set` and `git kv mset` register the `--expect-tree/-E` option and forward a valid value to the application layer.
+- **Integration Test (Valid OID passthrough):** Invoke `git kv set --expect-tree 0123456789abcdef0123456789abcdef01234567` and confirm the CLI exits `0`, passes the exact OID to the client stub, and does not emit validation errors.
+- **Integration Test (Invalid OIDs):**
+  - `git kv set --expect-tree deadbeef` → exit code `2`, stderr contains `Invalid OID...deadbeef`.
+  - `git kv set --expect-tree zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz` → exit code `2`, stderr validation message.
+  - `git kv set --expect-tree 0123456789abcdef0123456789abcdef0123456789abcdef` (wrong length 48) → exit code `2`, same error format.
+- **Integration Test (Missing value):** `git kv set --expect-tree` should fail parsing, exit `2`, and print a helpful usage error indicating the flag requires a value.
+- **Integration Test (mset parity):** Repeat the valid/invalid cases above with `git kv mset` to confirm symmetric behavior and that conflicting `--expect-tree` options across subcommands surface identical validation.
+- **Integration Test (Help text):** `git kv set --help` output includes the flag name, description "Compare-And-Swap entry point", notes that the value is an OID (40/64 hex), and shows a usage example (e.g., `--expect-tree 0123...`).

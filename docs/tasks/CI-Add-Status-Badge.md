@@ -9,9 +9,12 @@ Add a GitHub Actions status badge to the `README.md` file to visually indicate t
 ## 2. Acceptance Criteria
 
 - The `README.md` file is updated.
-- It includes a Markdown snippet for a GitHub Actions status badge.
+- It includes a Markdown snippet for a GitHub Actions status badge: `[![CI Status](https://github.com/flyingrobots/git-kv/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/flyingrobots/git-kv/actions/workflows/ci.yml)`.
+  ```markdown
+  [![CI Status](https://github.com/flyingrobots/git-kv/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/flyingrobots/git-kv/actions/workflows/ci.yml)
+  ```
 - The badge correctly links to the CI workflow and displays its current status.
-- The badge is placed prominently, typically near the top of the `README.md`.
+- Place the badge prominently near the top of `README.md` so the current status is immediately visible and the link to the workflow is obvious.
 
 ## 3. Test Plan
 

@@ -8,22 +8,30 @@ Implement the logic to read and parse the `.ref` pointer files found in the inde
 
 ## 2. Acceptance Criteria
 
-- A function takes the content of a `.ref` file as input and returns a `PointerStatus` enum (e.g., `Active`, `Deleted`, `Expired`) or an error.
-- It parses the JSON content of the file.
+- A function takes the raw string content of a `.ref` file and returns a `PointerStatus` enum (e.g., `Active`, `Deleted`, `Expired`) or an error.
+- The input must be valid JSON whose root is an object. Only the optional `"type"` field is inspected; additional fields are ignored.
 - If the JSON lacks a `"type"` field, it is treated as `Active`.
-- Allowed `"type"` values are: `"deleted"`, `"active"`, `"expired"`. Any other unrecognized value defaults to `Active`.
-- If the type is `"deleted"`, the function returns `Deleted`.
-- If the type is `"expired"`, the function returns `Expired`.
-- Otherwise (including `"active"` or unrecognized), the function returns `Active`.
+- Allowed `"type"` values are: `"deleted"`, `"active"`, `"expired"`. The value may include surrounding whitespace; trim before comparison.
+- If the trimmed `"type"` string is `"deleted"`, the function returns `Deleted`.
+- If the trimmed `"type"` string is `"expired"`, the function returns `Expired`.
+- If the trimmed `"type"` string is `"active"`, the function returns `Active`.
+- If the `"type"` field is missing or explicitly `null`, treat it as `Active`.
+- If the `"type"` field exists but is not a string (e.g., number, boolean, object, array), return an error indicating the type is malformed.
+- Any other trimmed string value defaults to `Active`.
 - The function returns an error object for malformed JSON.
 
 ## 3. Test Plan
 
 - **Unit Test (Type Handling):** Test with `.ref` files containing:
   - Missing `"type"` field.
+  - `"type"` explicitly `null`.
   - Unrecognized `"type"` value (e.g., `"unknown"`).
   - Explicit `"deleted"` type.
   - Explicit `"active"` type.
   - Explicit `"expired"` type.
+  - Case variants (e.g., `"DELETED"`, `"Expired"`).
+  - Values with surrounding whitespace (e.g., `" deleted "`).
   - Malformed JSON.
+  - Non-string `"type"` values (numbers, booleans, arrays, objects) that should return an error.
+  - Empty JSON object `{}`.
   - Verify the function returns the correct `PointerStatus` or error for each case.

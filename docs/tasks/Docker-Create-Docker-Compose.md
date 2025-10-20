@@ -8,12 +8,14 @@ Create a `docker-compose.yml` file to orchestrate the development container. Thi
 
 ## 2. Acceptance Criteria
 
-- A `docker-compose.yml` file exists at `/docker-compose.yml`.
-- It defines a service (e.g., `dev`) that builds from the `Dockerfile`).
+- A `docker-compose.yml` file exists at the project root (`./docker-compose.yml`).
+- It defines a service (e.g., `dev`) that builds from the `Dockerfile`.
 - It mounts the local project directory into the container's working directory (e.g., `/work`).
-- The service is configured to keep the container running indefinitely (e.g., `command: tail -f /dev/null`).
+- The service is configured to keep the container running indefinitely (e.g., `command: tail -f /dev/null`). This keeps the container alive without a foreground process so you can attach for debugging or work with mounted volumes.
+- Prefer replacing the keep-alive command with a real long-lived process (for dev, the app server; for prod, the actual service) when available.
 - A restart policy (e.g., `restart: unless-stopped`) is configured to ensure the container automatically restarts on crash or exit, preserving the developer workflow.
-- The service is named descriptively.
+- Service names should reflect their role and environment (e.g., `web`, `api`, `db`, with optional suffixes like `web-dev` or `api-prod`).
+- Example service names: `dev-web`, `dev-db`.
 
 ## 3. Test Plan
 

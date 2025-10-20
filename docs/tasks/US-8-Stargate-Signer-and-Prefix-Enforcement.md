@@ -13,9 +13,12 @@ Implement two key policy enforcement checks within the Stargate `pre-receive` ho
   - It extracts the signer's key (GPG or SSH).
   - The push is rejected if the signature is invalid or if the signer's key is not in the policy's `writers` list.
 - **Prefix Enforcement:**
-  - The hook inspects all keys involved in the transaction.
-  - For each key, it checks if the key starts with one of the prefixes in the `allowed_prefixes` list.
-  - If any key does not match, the entire transaction is rejected.
+  - The hook inspects three categories of keys:
+    1. Commit signer keys extracted from author/committer signatures.
+    2. Public keys embedded in configuration/artifact files touched by the commit (files matching policy globs such as `config/keys/*.pub`).
+    3. Public keys referenced in commit metadata (trailers or fields explicitly named `Key-Ref`, `Parent-Key`, etc.).
+  - Each key discovered in these categories must start with one of the configured `allowed_prefixes`; otherwise the transaction is rejected.
+  - Example: a commit touching `config/keys/app1.pub` and referencing `Key-Ref: ssh-ed25519 AAA...` must validate both the signer key and the referenced key against `allowed_prefixes`.
 - Rejection messages **must** be a single-line string in the exact format: `POLICY_VIOLATION:<ERROR_CODE>:<POLICY_NAME>:<DETAIL>`.
   - `ERROR_CODE`: A short uppercase token (e.g., `UNSIGNED_COMMIT`, `FORBIDDEN_PREFIX`).
   - `POLICY_NAME`: The identifier of the violated policy (e.g., `require_signed_commits`, `allowed_prefixes`).

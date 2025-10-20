@@ -8,10 +8,10 @@ Research, select, and integrate a Go library that provides Content-Defined Chunk
 
 ## 2. Acceptance Criteria
 
-- A suitable Go library for FastCDC is chosen based on criteria: supports configurable min/avg/max, streaming mode, actively maintained (within 12 months), and permissive license. This library is added as a dependency to the `go.mod` file.
+- A suitable Go library for FastCDC is chosen based on criteria: supports configurable min/avg/max, streaming mode, permissive license, and shows recent activity (most recent commit on or after 2024-10-20). This library is added as a dependency to the `go.mod` file.
 - A `Chunker` interface is defined: `type Chunker interface { Chunk(r io.Reader) ([]ChunkResult, error) }`.
 - Each `ChunkResult` returned by the `Chunker` **must** include `Offset`, `Length`, `Data` (or a reference to it), and `Fingerprint` (hash) fields.
-- The `Chunker` is instantiated via a constructor or factory that accepts `minSize`, `avgSize`, and `maxSize` parameters, with defaults of 64KB, 256KB, and 1MB respectively.
+- The `Chunker` is instantiated via a constructor or factory that accepts `minSize`, `avgSize`, and `maxSize` parameters as `uint32` byte counts (defaults: `minSize = 64 * 1024`, `avgSize = 256 * 1024`, `maxSize = 1 * 1024 * 1024`).
 
 ## 3. Test Plan
 
@@ -23,7 +23,9 @@ Research, select, and integrate a Go library that provides Content-Defined Chunk
     - The exact `Fingerprint` (hash) of each chunk.
     - The chunk boundaries (start/end offsets) are reproducible across multiple runs.
 - **Benchmark Test:**
-  - **Fixture:** `docs/tasks/testdata/chunker_fixtures/large-file-100mb.bin` (100MB of known content).
-  - **Chunker Config:** Same as above.
-  - **Metric:** Record throughput in MB/sec.
-  - **Target:** Establish a measurable baseline/target (e.g., >50 MB/sec) for actionable results.
+  - **Environment:** Single-threaded run on a 4.0 GHz x86-64 CPU with 16 GB RAM, SSD storage, Go `1.23.x`, no other CPU-intensive workloads.
+  - **Fixture:** `docs/tasks/testdata/chunker_fixtures/large-file-1gb.bin` (1 GB of deterministic content loaded from disk).
+  - **Chunker Config:** `minSize=64*1024`, `avgSize=256*1024`, `maxSize=1*1024*1024`.
+  - **Measurement:** Use `go test -bench=.` (or equivalent benchmark harness) to run 5 iterations, capture throughput (MB/sec) per iteration, compute the median.
+  - **Target:** Median throughput ≥ 50 MB/sec. If the median falls below 50 MB/sec, treat as a merge blocker until performance is addressed.
+  - **Reporting:** Document the benchmark command, raw output, and median calculation in the PR description (include hardware specs).
