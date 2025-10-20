@@ -8,10 +8,50 @@ Implement the client-side logic to locate and parse the `.kv/policy.yaml` file. 
 
 ## 2. Acceptance Criteria
 
-- A function exists that searches for `.kv/policy.yaml` in the repository root.
-- If found, it reads and parses the YAML content into a structured Go object.
-- The function can safely extract specific fields, such as `stargate.push_url`.
-- It handles cases where the file is missing, malformed, or the requested field is absent, returning clear errors.
+- A function `LoadPolicy(repoRoot string) (*Policy, error)` is defined.
+- **Repository Root Resolution:** `repoRoot` is defined as the nearest ancestor directory containing a `.git` directory, unless an explicit `--root` or `--path` flag is provided to the CLI.
+- The function searches for `.kv/policy.yaml` within the `repoRoot`.
+- If found, it reads and parses the YAML content into a `Policy` Go struct.
+- **Policy YAML Schema:**
+  ```yaml
+  version: 1 # Required, integer
+  stargate: # Required object
+    push_url: "string" # Required
+    read_url: "string" # Optional
+    require_mirror_ack_by_default: "boolean" # Optional, default false
+    admins: # Optional, array of strings (SSH/GPG keys)
+      - "ssh-ed25519 AAAAC3... admin1"
+  namespaces: # Required object
+    main: # Required object, namespace name
+      ledger_mode: "string" # Required, e.g., "linear"
+      require_signed_commits: "boolean" # Optional, default false
+      max_value_inline: "string" # Optional, e.g., "1MiB"
+      max_value_total: "string" # Optional, e.g., "100MiB"
+      chunking: # Optional object
+        mode: "string" # e.g., "fastcdc"
+        min: "string" # e.g., "64KiB"
+        avg: "string" # e.g., "256KiB"
+        max: "string" # e.g., "1MiB"
+      allowed_prefixes: # Optional, array of strings
+        - "cfg:"
+      writers: # Optional, array of strings (SSH/GPG keys)
+        - "ssh-ed25519 AAAAC3... writer1"
+      forbidden: # Optional, array of objects
+        - lfs: "boolean" # e.g., {lfs: true}
+      retention: # Optional object
+        ttl_default: "string" # e.g., "365d"
+        enforce_readside: "boolean" # Optional, default true
+  ```
+- **Go Struct Definition:**
+  ```go
+  type Policy struct {
+      Version    int               `yaml:"version"`
+      Stargate   StargatePolicy    `yaml:"stargate"`
+      Namespaces map[string]NamespacePolicy `yaml:"namespaces"`
+  }
+  // ... (nested structs for StargatePolicy, NamespacePolicy, etc. with yaml tags)
+  ```
+- The function handles cases where the file is missing, malformed, or required fields are absent, returning clear, specific errors (e.g., "policy file not found", "malformed YAML", "stargate.push_url is required").
 
 ## 3. Test Plan
 
