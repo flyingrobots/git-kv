@@ -10,9 +10,9 @@ Create the initial GitHub Actions workflow file (`.github/workflows/ci.yml`) tha
 
 - A `ci.yml` file exists at `.github/workflows/ci.yml`.
 - The workflow is named descriptively (e.g., "CI Pipeline").
-- It is configured to trigger on `push` events to the `main` branch.
-- It is configured to trigger on `pull_request` events targeting the `main` branch.
-- It defines a single job (e.g., `build-and-test`) that runs on a Linux runner (e.g., `ubuntu-latest`).
+- Triggers on `push` events to the `main` branch.
+- Triggers on `pull_request` events targeting the `main` branch.
+- Defines a single job (for example, `build-and-test`) that runs on a Linux runner (e.g., `ubuntu-latest`).
 
 ## 3. Test Plan
 
