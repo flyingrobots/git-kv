@@ -10,8 +10,26 @@ Implement or update the `post-receive` hook on the Stargate server. After a push
 
 - The `post-receive` hook is an executable script in the Stargate repo's `hooks` directory.
 - The hook reads the `old`, `new`, and `ref` values from stdin for all updated refs.
-- For each relevant ref update (e.g., `refs/kv/*`, `refs/kv-index/*`), it writes a structured log entry to a journal file (e.g., `.stargate/mirror-journal.ndjson`).
-- The log entry should contain all information needed for a background worker to process the push, such as the ref name and the new OID.
+- For each relevant ref update (e.g., `refs/kv/*`, `refs/kv-index/*`), it writes a single-line NDJSON entry to the journal file (e.g., `.stargate/mirror-journal.ndjson`).
+- The NDJSON schema for each entry **must** be:
+  ```json
+  {
+    "timestamp": "ISO8601 string",
+    "event": "string (e.g., ref_update)",
+    "ref": "string (e.g., refs/kv/main)",
+    "old_oid": "hex string | null",
+    "new_oid": "hex string",
+    "pusher": "string | null (e.g., user@example.com)",
+    "repo": "string | null (e.g., flyingrobots/git-kv)",
+    "source": "string (e.g., post-receive)",
+    "meta": "object | null (additional metadata)"
+  }
+  ```
+- **Example NDJSON Entry:**
+  ```json
+  {"timestamp":"2025-10-26T12:34:56Z","event":"ref_update","ref":"refs/kv/main","old_oid":"a1b2c3d4...","new_oid":"e5f6g7h8...","pusher":"user@example.com","repo":"flyingrobots/git-kv","source":"post-receive","meta":{"txn_id":"01JBAX..."}}
+  ```
+- Each entry **must** be atomically appended (single-line JSON) to the journal file.
 - The hook must be robust and not fail silently.
 
 ## 3. Test Plan
