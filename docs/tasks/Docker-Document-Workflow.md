@@ -14,7 +14,8 @@ Add clear instructions to the `README.md` file explaining how to set up and use 
   - Start the development container.
   - Access a shell inside the container.
   - Run tests and linters from the host or within the container.
-  - Stop and remove the container.- The documentation emphasizes the benefits of using the Dockerized environment.
+  - Stop and remove the container.
+  - The documentation emphasizes the benefits of using the Dockerized environment.
 
 ## 3. Test Plan
 

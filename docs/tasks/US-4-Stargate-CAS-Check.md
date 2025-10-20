@@ -1,4 +1,4 @@
-# Task: Stargate CAS Check in `pre-receive`
+# Task: Stargate-CAS-Check in `pre-receive`
 
 **Feature:** `US-4 — CAS on branch`
 
@@ -12,7 +12,7 @@ Update the Stargate's `pre-receive` hook to perform the Compare-And-Swap (CAS) c
 - Before other validation, the hook checks if a CAS operation is requested.
 - If so, it reads the current OID of the `refs/kv/<ns>` branch tip.
 - It compares this current OID with the expected OID from the client.
-- If they do not match, the hook rejects the push with a specific, machine-readable error message: "ERROR: CAS_CONFLICT: Expected tree OID mismatch." This rejection must also use a specific exit code (e.g., 2).
+- If they do not match, the hook rejects the push with a specific, machine-readable error message: "ERROR: CAS_CONFLICT: Expected tree OID mismatch." This rejection must use exit code 2.
 - If they do match, validation continues as normal.
 
 ## 3. Test Plan

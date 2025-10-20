@@ -14,9 +14,17 @@ Add a job to the CI workflow that checks out the code, sets up the Go environmen
 - The job uses `actions/checkout@v4` to check out the repository code.
 - It uses `actions/setup-go@v5` to set up the Go environment.
 - It executes `make lint`.
-- The job reports its status (success/failure) back to GitHub.
+- The job fails fast on lint failure (non-zero exit code from `make lint` causes job to fail).
 
 ## 3. Test Plan
 
-- **Integration Test (Success):** Push a commit with no linting errors. Verify the `lint` job in the CI pipeline passes.
-- **Integration Test (Failure):** Push a commit with a deliberate linting error. Verify the `lint` job in the CI pipeline fails.
+- **Integration Test (Success):**
+  1. Push a commit with no linting errors to a test branch.
+  2. Open a PR to `main`.
+  3. Open the GitHub Actions workflow run for the PR.
+  4. Confirm the `lint` job appears and shows "completed".
+  5. Click into the `lint` job and confirm the step that runs `make lint` succeeded.
+  6. Verify the job log contains lint output (e.g., "No issues found" or similar).
+- **Integration Test (Failure):**
+  1. Repeat the above steps with a deliberately introduced linting error.
+  2. Confirm the `lint` job fails and the job log contains the lint error output.
