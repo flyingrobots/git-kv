@@ -13,8 +13,11 @@ Implement standard HTTP health endpoints (`/healthz` and `/readyz`) for the Star
   - It returns HTTP 200 OK if the Stargate process is running and basic dependencies (e.g., Git repository access) are functional.
   - It returns HTTP 500 Internal Server Error otherwise.
 - A `/readyz` endpoint is available.
-  - It returns HTTP 200 OK only if the Stargate instance is the elected leader AND its mirror remote (GitHub) is reachable AND its internal queues are draining.
-  - It returns HTTP 503 Service Unavailable otherwise.
+  - It returns HTTP 200 OK only if the Stargate instance is the elected leader AND its mirror remote (GitHub) is reachable AND its internal work queues (e.g., mirror queue, watchlog queue) meet operational thresholds.
+  - **Queue Thresholds:**
+    - Per-queue depth must be below 100 items (`pending_count <= 100`).
+    - Or, the queue processing success rate must be above 95% over the last 5 minutes (`processed_count / (processed_count + pending_count) >= 0.95`).
+  - It returns HTTP 503 Service Unavailable otherwise, with a body detailing which queue is unhealthy.
 
 ## 3. Test Plan
 
