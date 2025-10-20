@@ -17,6 +17,13 @@ Modify the `git kv set` command to automatically handle large values. When a val
 
 ## 3. Test Plan
 
-- **Integration Test:** Run `git kv set` with a file larger than the inline threshold. Verify that a `.manifest.json` file is created in the ledger, not the raw file content.
-- **Integration Test:** Inspect the `refs/kv-chunks/...` ref and verify that it contains new Git blobs corresponding to the chunks.
-- **Failure Case:** Test with a file that exceeds the `max_value_total` and verify the command fails with an appropriate error.
+- **Integration Test (Chunking Success):**
+  - **Fixture:** `docs/tasks/testdata/chunker_fixtures/large-file-1mb.bin` (1,048,576 bytes).
+  - **Chunking Policy:** Use `minSize=64KB`, `avgSize=256KB`, `maxSize=1MB` (as defined in `US-5-Integrate-Chunking-Library.md`).
+  - **Expected Chunks:** Compute the expected number of chunks based on the fixture size and chunking policy.
+  - Run `git kv set` with the fixture file. Verify that a manifest file is created in the ledger, not the raw file content.
+  - Inspect the `refs/kv-chunks/...` ref and verify it contains the **exact expected number** of new Git blobs corresponding to the chunks.
+- **Failure Case (Exceed `max_value_total`):**
+  - **Policy:** Set `max_value_total` to 1.5MB in the test policy (originating from `.kv/policy.yaml`).
+  - **Fixture:** Use a file larger than 1.5MB.
+  - Run `git kv set` with this file. Verify the command fails with an error indicating the `max_value_total` limit was exceeded.
