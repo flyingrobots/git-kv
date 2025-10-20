@@ -13,8 +13,13 @@ Implement the background worker process on the Stargate server. This worker will
 - For each entry, it executes `git push --atomic <mirror_remote> <refspec>...`.
 - The `mirror_remote` is the pre-configured name for the GitHub remote (e.g., `github-origin`).
 - The push includes the main data ref and its corresponding watermark ref (`refs/kv-mirror/<ns>`).
-- If the push fails, the worker should have a retry mechanism with exponential backoff.
-- Successfully processed journal entries are marked as complete or removed.
+- If the push fails, the worker implements an exponential backoff retry mechanism with:
+  - Initial delay: 500ms.
+  - Maximum delay cap: 60s.
+  - Maximum retry attempts: 10.
+  - Randomized jitter: Yes (e.g., +/- 25% of delay).
+- Successfully processed journal entries are **deleted** from the journal file.
+- Failed journal entries (after exhausting retries) are moved to a separate "dead-letter" queue or logged as permanent failures.
 
 ## 3. Test Plan
 
