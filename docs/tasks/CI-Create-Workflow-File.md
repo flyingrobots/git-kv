@@ -13,7 +13,7 @@ Create the initial GitHub Actions workflow file (`.github/workflows/ci.yml`) tha
 - Triggers on `push` events to the `main` branch.
 - Triggers on `pull_request` events targeting the `main` branch.
 - Defines a single job (for example, `build-and-test`) that runs on a Linux runner (e.g., `ubuntu-latest`) and includes, at minimum, the following functional steps so the job performs real work:
-  - Check out the repository using `actions/checkout@v4`.
+  - Check out the repository using `actions/checkout@v5` (see `docs/ci-action-versions.md` for canonical action versions).
   - Set up the required runtime with the appropriate setup action, using the latest stable version recommended for your runtime (or pinning to a tested major release for reproducibility).
   - Install project dependencies by running the project's install command (for example, `npm ci`, `pip install -r requirements.txt`, or `./gradlew dependencies`).
   - Run the project's automated test command (for example, `npm test`, `pytest`, or `./gradlew test`).

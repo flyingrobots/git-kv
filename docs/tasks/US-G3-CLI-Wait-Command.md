@@ -15,7 +15,7 @@ Implement the `git kv wait` command. This command allows a client (like a CI scr
 - It accepts an optional `--poll-interval <duration>` flag (default `2s`). The command polls `git ls-remote origin refs/kv-mirror/<ns>` every `POLL_INTERVAL` (default 2 seconds, chosen to balance responsiveness and remote load).
 - If a `git ls-remote` invocation fails, the command retries up to three additional attempts using exponential backoff delays of `1s`, `2s`, and `4s` between retries. Transient failures that succeed within these retries do not abort the wait.
 - The command exits with status 0 as soon as the watermark's OID is the same as, or the target OID is an ancestor of the watermark OID (i.e., `git merge-base --is-ancestor <target> <watermark>` returns true).
-- If the timeout is reached before the condition is met, the command exits with a non-zero status code and an error message.
+- If the timeout is reached before the condition is met, the command exits with a non-zero status code and prints a clear message such as `ERROR: timeout waiting for refs/kv-mirror/<ns> to reach <target_oid>`.
 - If all retry attempts for `git ls-remote` fail before reaching the timeout, the command exits non-zero and prints a clear error message (e.g., `failed to poll refs/kv-mirror/<ns> after 4 attempts: <error>`).
 
 ## 3. Test Plan

@@ -4,8 +4,8 @@ The following versions are canonical for the CI jobs in this project. When updat
 
 | Job | Action | Required Reference |
 | --- | --- | --- |
-| lint | actions/checkout | actions/checkout@v4 |
-| lint | actions/setup-go | actions/setup-go@v5 |
+| lint | actions/checkout | actions/checkout@v5 |
+| lint | actions/setup-go | actions/setup-go@v6 |
 | test | actions/checkout | actions/checkout@v5 |
 | test | actions/setup-go | actions/setup-go@v6 |
 

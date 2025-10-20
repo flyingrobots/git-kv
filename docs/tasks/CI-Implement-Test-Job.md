@@ -6,7 +6,7 @@
 
 Add a job to the CI workflow that checks out the code, sets up the Go environment, and runs the project's tests. Ensure the Go modules cache remains enabled so repeated runs reuse dependencies.
 
-**Note on Action Versions:** All GitHub Actions used in this job must match the required references listed in `docs/ci-action-versions.md`. For the `test` job that means `actions/checkout@v5` and `actions/setup-go@v6`. If you need to change a version, update the manifest first and then adjust every workflow and task doc that depends on it so the project stays consistent.
+**Note on Action Versions:** All GitHub Actions used in this job must match the required references listed in `docs/ci-action-versions.md`. Canonical CI versions: `actions/checkout@v5` and `actions/setup-go@v6`. If you need to change a version, update the manifest first and then adjust every workflow and task doc that depends on it so the project stays consistent.
 
 **Note on Caching:** `actions/setup-go` enables module caching by default when a `go.sum` file exists at the repository root. Do not disable this cache; it should remain active to reduce build times.
 
