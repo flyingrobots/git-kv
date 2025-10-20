@@ -16,5 +16,13 @@ Add a job to the CI workflow that checks out the code, sets up the Go environmen
 
 ## 3. Test Plan
 
-- **Integration Test (Success):** Push a commit with passing tests. Verify the `test` job in the CI pipeline passes.
-- **Integration Test (Failure):** Push a commit with a deliberately failing test. Verify the `test` job in the CI pipeline fails.
+- **Integration Test (Passing Tests):**
+  1. Push a commit with passing tests to a test branch.
+  2. Open a PR to `main`.
+  3. Open the GitHub Actions workflow run for the PR.
+  4. Confirm the `test` job appears and shows "completed".
+  5. Click into the `test` job and confirm the step that runs `make test` succeeded.
+  6. Verify the job log contains actual test output (e.g., "ok github.com/...").
+- **Integration Test (Failing Tests):**
+  1. Repeat the above steps with a deliberately failing test.
+  2. Confirm the `test` job fails and the job log contains the failing test output.
