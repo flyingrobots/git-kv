@@ -4,14 +4,18 @@
 
 ## 1. Description
 
-Implement the specific logic for the `list` command to translate a given key prefix into a directory path within the index branch. The index uses the first few characters of the key to create a sharded directory structure (e.g., key `user:123` might be at `index/us/er/user:123.ref`). This task is about converting the prefix to the path to be searched.
+Implement the specific logic for the `list` command to translate a given key prefix into a directory path within the index branch. The index uses a fixed 2-character sharding depth, splitting keys by their first 2 characters into nested directories (e.g., `index/XX/YY/`). This task is about converting the prefix to the path to be searched.
 
 ## 2. Acceptance Criteria
 
 - A function takes a prefix string (e.g., `user:`) as input.
 - It returns the corresponding directory path to search in the index (e.g., `index/us/er/`).
-- The logic correctly handles prefixes of varying lengths, including those shorter or longer than the sharding depth.
-- For a prefix shorter than the shard depth (e.g., `u`), it returns the top-level path to search (e.g., `index/u/`).
+- The logic correctly handles prefixes of varying lengths, translating them into the appropriate index directory path based on the 2-character sharding depth.
+  - **Example:**
+    - Key `user:123` maps to `index/us/er/user:123.ref`.
+    - Prefix `user:` maps to `index/us/er/`.
+    - Prefix `u` maps to `index/u/`.
+    - An empty prefix maps to `index/`.
 
 ## 3. Test Plan
 
