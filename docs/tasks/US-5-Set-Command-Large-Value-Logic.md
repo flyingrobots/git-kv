@@ -9,9 +9,10 @@ Modify the `git kv set` command to automatically handle large values. When a val
 ## 2. Acceptance Criteria
 
 - The `set` command logic checks the size of the input value (from a file or stdin).
-- If the size is greater than `max_value_inline` from the policy file, the chunking process is initiated.
-- The chunks are created as Git blobs and stored in a new `refs/kv-chunks/<ns>@<epoch>` tree.
-- A manifest file is created in the main ledger tree instead of the raw value.
+- If the size is greater than `max_value_inline` (defaulting to 1MB if absent in policy, with a warning logged), the chunking process is initiated.
+- The chunks are created as Git blobs and stored in a tree at `refs/kv-chunks/<ns>@<epoch>`. Each chunk is a blob child named by a zero-padded sequence number (e.g., `000001`, `000002`, ...) and referenced in a tree listing, not nested in subdirectories.
+- A manifest file is created in the main ledger tree as a sibling object at `<key-path>/.manifests/<key>-<epoch>.json` containing ordered chunk sequence and blob hashes.
+- Cross-reference `US-5-Integrate-Chunking-Library.md` for min/avg/max chunk sizes.
 - The process is transparent to the user unless an error occurs.
 
 ## 3. Test Plan
