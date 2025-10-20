@@ -16,7 +16,12 @@ Implement two key policy enforcement checks within the Stargate `pre-receive` ho
   - The hook inspects all keys involved in the transaction.
   - For each key, it checks if the key starts with one of the prefixes in the `allowed_prefixes` list.
   - If any key does not match, the entire transaction is rejected.
-- Rejection messages must be clear and indicate which policy was violated.
+- Rejection messages **must** be a single-line string in the exact format: `POLICY_VIOLATION:<ERROR_CODE>:<POLICY_NAME>:<DETAIL>`.
+  - `ERROR_CODE`: A short uppercase token (e.g., `UNSIGNED_COMMIT`, `FORBIDDEN_PREFIX`).
+  - `POLICY_NAME`: The identifier of the violated policy (e.g., `require_signed_commits`, `allowed_prefixes`).
+  - `DETAIL`: A human-readable brief explanation.
+  - **Example:** `POLICY_VIOLATION:UNSIGNED_COMMIT:require_signed_commits:push signed by unauthorized key`
+- Implementations **must** emit messages exactly in this pattern so clients can reliably parse by splitting on `:` and validating the first token equals `POLICY_VIOLATION`.
 
 ## 3. Test Plan
 
