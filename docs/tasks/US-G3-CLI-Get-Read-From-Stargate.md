@@ -11,7 +11,7 @@ Modify the existing `git kv get` command to support a `--read-from=stargate` fla
 - The `git kv get` command accepts a `--read-from` flag which can take the value `stargate` (or `origin` for the default).
 - When `--read-from=stargate` is used, the command logic fetches the requested key from the Git remote defined in `remote.origin.pushurl`.
 - When the flag is not used, it defaults to reading from the standard `remote.origin.url`.
-- The logic must handle cases where `pushurl` is not configured.
+- If `--read-from=stargate` is used and `remote.origin.pushurl` is not configured, the command **must** fail with exit code `PUSHURL_NOT_FOUND` and print the exact message: "Error: remote.origin.pushurl is not configured; use 'git remote set-url --push' to set it."
 
 ## 3. Test Plan
 
