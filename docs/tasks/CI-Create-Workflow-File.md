@@ -16,5 +16,12 @@ Create the initial GitHub Actions workflow file (`.github/workflows/ci.yml`) tha
 
 ## 3. Test Plan
 
-- **Manual Test:** Push an empty commit to a test branch and open a PR to `main`. Verify that the workflow is triggered and appears in the GitHub Actions tab.
-- **Manual Test:** Push a commit directly to `main` (if allowed). Verify the workflow is triggered.
+- **Integration Test (PR Trigger):**
+  1. Push a commit to a test branch.
+  2. Open a Pull Request from the test branch to `main`.
+  3. Confirm the workflow is triggered in the GitHub Actions tab for the PR.
+  4. Confirm the `build-and-test` job appears and completes (success/failure).
+  5. Inspect the job logs to verify it ran on `ubuntu-latest`.
+- **Integration Test (Direct Push Trigger):**
+  1. If branch protection permits, push a commit directly to `main`. Otherwise, mirror `main` to a test branch and push a commit there.
+  2. Repeat steps 2-5 from the PR Trigger test plan to verify execution.
