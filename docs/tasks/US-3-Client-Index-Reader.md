@@ -16,4 +16,4 @@ Implement the client-side logic responsible for reading data from the `refs/kv-i
 
 - **Unit Test:** Using a mock Git repository, test that the function can correctly list all files in a sample index tree.
 - **Unit Test:** Test that the function correctly lists only the files under a specific directory path (e.g., `index/us/er/`).
-- **Performance:** Create a test with a very large index (e.g., 1 million entries) and verify the function completes within an acceptable time limit.
+- **Performance:** Create a test with an index containing 1 million entries and verify the function completes within an acceptable time limit.
