@@ -9,7 +9,7 @@ Implement the core logic for `git kv stargate sync` to detect divergences betwee
 ## 2. Acceptance Criteria
 
 - The logic compares the OIDs of all refs matching the glob patterns `refs/kv/*`, `refs/kv-index/*`, `refs/kv-chunks/*`, `refs/kv-epoch/*`, `refs/kv-archive/*`, `refs/kv-watchlog/*`, and `refs/kv-mirror/*` on the Stargate with their counterparts on the GitHub mirror.
-- **Error Reporting:** All errors (e.g., network issues, non-fast-forward rejections) are written to `stderr` and a structured log file. Errors include ref name, source OID, target OID, and a human-readable reason.
+- **Error Reporting:** All errors (e.g., network issues, non-fast-forward rejections) are written to `stderr` and a structured log file (e.g., `stargate-sync.log`). Errors **must** include ref name, source OID, target OID, and a human-readable reason.
 - **`--dry-run` mode:**
   - Identifies refs that are ahead on Stargate (mirror is behind).
   - Identifies refs that are ahead on the mirror (Stargate is behind, indicating divergence).
@@ -18,7 +18,7 @@ Implement the core logic for `git kv stargate sync` to detect divergences betwee
 - **`--repair` mode:**
   - For refs where Stargate is ahead, it attempts a `git push <mirror_remote> <refspec>` (fast-forward push).
   - If the mirror is ahead (non-fast-forward), it reports an error (as defined in Error Reporting) and does not push that specific ref.
-  - **Retry/Abort Policy:** Continues processing remaining refs on individual failures and aggregates/reports all failures at the end.
+  - **Retry/Abort Policy:** The command continues processing remaining refs on individual failures and aggregates/reports all failures at the end.
   - Exit code: `0` (all good/no repairs), `1` (non-fatal repair failures but completed processing), `2` (fatal error that stops processing).
 
 ## 3. Test Plan
