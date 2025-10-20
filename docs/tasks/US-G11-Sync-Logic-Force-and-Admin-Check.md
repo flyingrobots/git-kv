@@ -10,6 +10,9 @@ Implement the `--force` mode for `git kv stargate sync`, which allows an authori
 
 - **`--force` mode:**
   - When invoked, it performs a `git push --force <mirror_remote> <refspec>` for all diverging refs where the Stargate is the source of truth.
+  - **Diverging Definition:** A ref is "diverging" if its OID on the Stargate and the mirror are different, and neither is an ancestor of the other (i.e., `git merge-base` shows no common ancestor or different tips with no fast-forward).
+  - **Mirror-Only Refs:** Refs present only on the mirror (not on Stargate) are deleted from the mirror. This behavior is configurable via a `--delete-mirror-only` flag (default: true).
+  - **Read-Only/Protected Refs:** If a ref is protected on the mirror (e.g., GitHub branch protection rules), the force push will fail for that specific ref. This failure is logged, and the operation continues for other refs (configurable strictness via `--fail-on-protected-ref` flag).
   - This operation will overwrite any commits on the mirror that are not present on the Stargate.
 - **Admin Check:**
   - Before executing `--force`, the command verifies that the user running it is listed in the `stargate.admins` section of the `.kv/policy.yaml` file.
