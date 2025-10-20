@@ -8,10 +8,10 @@ Research, select, and integrate a Go library that provides Content-Defined Chunk
 
 ## 2. Acceptance Criteria
 
-- A suitable Go library for FastCDC is chosen and added as a dependency to the `go.mod` file.
-- A wrapper or service is created within the `git-kv` codebase that exposes a simple interface for chunking a file or a byte stream.
-- The interface should return a list of chunk byte arrays.
-- The chunking parameters (min, avg, max size) should be configurable, defaulting to the values in the spec (64KB, 256KB, 1MB).
+- A suitable Go library for FastCDC is chosen based on criteria: supports configurable min/avg/max, streaming mode, actively maintained (within 12 months), and permissive license. This library is added as a dependency to the `go.mod` file.
+- A `Chunker` interface is defined: `type Chunker interface { Chunk(r io.Reader) ([]ChunkResult, error) }`.
+- Each `ChunkResult` returned by the `Chunker` **must** include `Offset`, `Length`, `Data` (or a reference to it), and `Fingerprint` (hash) fields.
+- The `Chunker` is instantiated via a constructor or factory that accepts `minSize`, `avgSize`, and `maxSize` parameters, with defaults of 64KB, 256KB, and 1MB respectively.
 
 ## 3. Test Plan
 
