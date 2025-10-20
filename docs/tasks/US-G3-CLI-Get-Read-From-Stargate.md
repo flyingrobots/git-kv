@@ -17,4 +17,4 @@ Modify the existing `git kv get` command to support a `--read-from=stargate` fla
 
 - **Integration Test:** Set up a test repo with a `url` pointing to a mock mirror and a `pushurl` pointing to a mock Stargate. Create a key and push it to the Stargate. Immediately run `get --read-from=stargate` and verify it returns the new value. Run a standard `get` and verify it returns an old or non-existent value (simulating mirror lag).
 - **Unit Test:** Test the logic that selects the correct remote URL based on the flag.
-- **Failure Case:** Run the command with `--read-from=stargate` in a repo where the `pushurl` is not configured. Verify it fails with a clear error.
+- **Failure Case:** Run the command with `--read-from=stargate` in a repo where `remote.origin.pushurl` is not configured. Assert that the command exits with code `PUSHURL_NOT_FOUND` and prints the exact error message: "Error: remote.origin.pushurl is not configured; use 'git remote set-url --push' to set it."
