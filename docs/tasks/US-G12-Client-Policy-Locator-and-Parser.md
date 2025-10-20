@@ -15,7 +15,36 @@ Implement the client-side logic to locate and parse the `.kv/policy.yaml` file. 
 
 ## 3. Test Plan
 
-- **Unit Test (Success):** Provide a mock repository with a valid policy file. Verify the function correctly parses the file and extracts the `push_url`.
-- **Unit Test (Missing File):** Provide a mock repository without the policy file. Verify the function returns an appropriate error.
-- **Unit Test (Malformed YAML):** Provide a mock policy file with invalid YAML. Verify the function returns a parsing error.
-- **Unit Test (Missing Field):** Provide a mock policy file that is valid YAML but lacks the `stargate.push_url` field. Verify the function returns an error indicating the field is missing.
+Fixtures for these tests are committed under `docs/tasks/testdata/policy_parser_fixtures/`.
+
+- **Unit Test (Success):**
+  - **Fixture:** `docs/tasks/testdata/policy_parser_fixtures/valid-policy.yaml`
+    ```yaml
+    version: 1
+    stargate:
+      push_url: "ssh://git@stargate.local/org/repo.git"
+    ```
+  - **Expected Output:** `stargate.push_url` value is `"ssh://git@stargate.local/org/repo.git"`.
+  - Verify the function correctly parses the file and extracts the `push_url`.
+- **Unit Test (Missing File):**
+  - **Fixture:** An empty directory (no policy file).
+  - **Expected Error:** A specific error string indicating the file was not found (e.g., "policy file not found").
+  - Verify the function returns the expected error.
+- **Unit Test (Malformed YAML):**
+  - **Fixture:** `docs/tasks/testdata/policy_parser_fixtures/malformed-policy.yaml`
+    ```yaml
+    version: 1
+    stargate:
+      push_url: "ssh://git@stargate.local/org/repo.git"
+    - This is not valid YAML
+    ```
+  - **Expected Error:** A specific YAML parsing error string.
+  - Verify the function returns the expected parsing error.
+- **Unit Test (Missing Field):**
+  - **Fixture:** `docs/tasks/testdata/policy_parser_fixtures/missing-push-url.yaml`
+    ```yaml
+    version: 1
+    stargate: {}
+    ```
+  - **Expected Error:** A specific error string indicating the `stargate.push_url` field is missing (e.g., "stargate.push_url not found in policy").
+  - Verify the function returns the expected error.
