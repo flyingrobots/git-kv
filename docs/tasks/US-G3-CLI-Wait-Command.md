@@ -10,9 +10,10 @@ Implement the `git kv wait` command. This command allows a client (like a CI scr
 
 - A `git kv wait` command is added to the CLI.
 - It accepts a required `--oid <hash>` flag specifying the ledger commit to wait for.
-- It accepts an optional `--timeout <duration>` flag (e.g., `60s`, `5m`). Default should be reasonable (e.g., 5 minutes).
-- The command periodically runs `git ls-remote origin refs/kv-mirror/<ns>` to check the OID of the watermark.
-- The command exits with success (0) as soon as the watermark's OID is the same as, or a descendant of, the OID specified in the `--oid` flag.
+- It accepts a required `--ns <namespace>` flag (if omitted, defaults to `main` or the namespace defined in `.kv/policy.yaml`).
+- It accepts an optional `--timeout <duration>` flag (e.g., `60s`, `5m`). **Default: 5m**.
+- The command polls `git ls-remote origin refs/kv-mirror/<ns>` every 2 seconds to check the OID of the watermark.
+- The command exits with status 0 as soon as the watermark's OID is the same as, or the target OID is an ancestor of the watermark OID (i.e., `git merge-base --is-ancestor <target> <watermark>` returns true).
 - If the timeout is reached before the condition is met, the command exits with a non-zero status code and an error message.
 
 ## 3. Test Plan
