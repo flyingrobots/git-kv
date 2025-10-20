@@ -10,8 +10,8 @@ Implement the logic within the Stargate service to find, load, and parse the `.k
 
 - The Stargate service, on startup or on push, locates and reads the `.kv/policy.yaml` file from the repository's default branch.
 - It uses a YAML parser to load the file content into a structured Go object.
-- The logic is resilient to a missing policy file or a malformed one, and can be configured to either fail-safe (reject all pushes) or fail-open (allow all pushes) in such cases.
-- The parsed policy object is made available to the validation logic within the `pre-receive` hook.
+- The Stargate service loads the policy at startup. On parse/load failure, it defaults to fail-safe (reject all pushes). This behavior can be overridden via the `KV_POLICY_FAILMODE` environment variable (values: "safe" or "open").
+- The parsed policy object is injected into each `pre-receive` hook invocation as an explicit parameter (e.g., `runValidation(policy, push_event)`) to ensure a clear call contract.
 
 ## 3. Test Plan
 
